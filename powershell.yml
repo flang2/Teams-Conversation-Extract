@@ -1,0 +1,37 @@
+﻿name: PowerShell syntax
+
+
+on:
+  push:
+  pull_request:
+
+
+permissions:
+  contents: read
+
+
+jobs:
+  syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell scripts
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem -LiteralPath ./tools -Filter *.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $_.FullName,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Error "$($_.Name): $($errors -join '; ')"
+            }
+          }
+          if ($failed) {
+            throw "One or more PowerShell files failed syntax validation."
+          }
