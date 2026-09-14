@@ -1,0 +1,5 @@
+config.psd1
+output/
+*.incomplete
+Teams-Chat-Transcript-*.md
+Teams-Chat-Transcript-LastRun.log
